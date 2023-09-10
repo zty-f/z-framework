@@ -1,9 +1,9 @@
 package main
 
 import (
-	"example/zweb"
 	"fmt"
 	"net/http"
+	"zty/zweb"
 )
 
 func main() {
