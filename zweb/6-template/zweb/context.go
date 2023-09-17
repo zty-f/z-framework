@@ -1,0 +1,110 @@
+package zweb
+
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+)
+
+// H 是一个map[string]string的别名
+type H map[string]interface{}
+
+type Context struct {
+	// 上下文请求对象
+	Req    *http.Request
+	Writer http.ResponseWriter
+	// 请求信息
+	Path   string
+	Method string
+	Params map[string]string
+	// 响应信息
+	StatusCode int
+	// 中间件信息
+	handlers []HandlerFunc
+	index    int // 执行顺序索引
+
+	// engine 指针
+	engine *Engine
+}
+
+func newContext(writer http.ResponseWriter, req *http.Request) *Context {
+	return &Context{
+		Req:    req,
+		Writer: writer,
+		Path:   req.URL.Path,
+		Method: req.Method,
+		index:  -1,
+	}
+}
+
+func (c *Context) Next() {
+	c.index++
+	s := len(c.handlers)
+	for ; c.index < s; c.index++ {
+		c.handlers[c.index](c)
+	}
+}
+
+// Fail 提前终止请求
+func (c *Context) Fail(code int, err string) {
+	c.index = len(c.handlers)
+	c.JSON(code, H{"message": err})
+}
+
+// PostForm 获取POST表单数据
+func (c *Context) PostForm(key string) string {
+	return c.Req.PostFormValue(key)
+}
+
+// Query 获取GET参数
+func (c *Context) Query(key string) string {
+	return c.Req.URL.Query().Get(key)
+}
+
+// Status 设置响应状态
+func (c *Context) Status(status int) {
+	c.StatusCode = status
+	c.Writer.WriteHeader(status)
+}
+
+// SetHeader 设置响应头
+func (c *Context) SetHeader(key, value string) {
+	c.Writer.Header().Set(key, value)
+}
+
+// String 构建字符串响应
+func (c *Context) String(code int, format string, values ...interface{}) {
+	c.SetHeader("Content-Type", "text/plain")
+	c.Status(code)
+	c.Writer.Write([]byte(fmt.Sprintf(format, values...)))
+}
+
+// JSON 构建JSON响应
+func (c *Context) JSON(code int, obj interface{}) {
+	c.SetHeader("Content-Type", "application/json")
+	c.Status(code)
+	encoder := json.NewEncoder(c.Writer)
+	if err := encoder.Encode(obj); err != nil {
+		http.Error(c.Writer, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+// HTML 构建HTML响应
+func (c *Context) HTML(code int, name string, data interface{}) {
+	c.SetHeader("Content-Type", "text/html")
+	c.Status(code)
+	if err := c.engine.htmlTemplates.ExecuteTemplate(c.Writer, name, data); err != nil {
+		c.Fail(500, err.Error())
+	}
+}
+
+// Data  构建Data响应
+func (c *Context) Data(code int, data []byte) {
+	c.Status(code)
+	c.Writer.Write(data)
+}
+
+func (c *Context) Param(key string) string {
+	value, _ := c.Params[key]
+	return value
+}
