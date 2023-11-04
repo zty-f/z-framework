@@ -73,7 +73,7 @@ func (g *Group) load(key string) (value ByteView, err error) {
 			if value, err = g.getFromPeer(peer, key); err == nil {
 				return value, nil
 			}
-			log.Printf("[GeeCache] Failed to get from peer err:%v", err)
+			log.Printf("[ZCache] Failed to get from peer err:%v", err)
 		}
 	}
 	return g.getLocally(key)
