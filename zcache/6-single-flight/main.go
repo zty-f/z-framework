@@ -52,14 +52,14 @@ func startAPIServer(apiAddr string, gee *zcache.Group) {
 }
 
 /*
-2023/11/04 16:13:44 zcache is running at http://localhost:8002
-2023/11/04 16:13:44 zcache is running at http://localhost:8003
-2023/11/04 16:13:44 zcache is running at http://localhost:8001
-2023/11/04 16:13:44 fontend server is running at http://localhost:9999
+2023/11/04 16:15:30 zcache is running at http://localhost:8002
+2023/11/04 16:15:30 zcache is running at http://localhost:8001
+2023/11/04 16:15:30 zcache is running at http://localhost:8003
+2023/11/04 16:15:30 fontend server is running at http://localhost:9999
 >>> start test
-2023/11/04 16:13:46 [Server http://localhost:8003] pick peer: http://localhost:8001
-2023/11/04 16:13:46 [Server http://localhost:8001] GET /_zcache/scores/Tom
-2023/11/04 16:13:46 [SlowDB] search key Tom
+2023/11/04 16:15:32 [Server http://localhost:8003] pick peer: http://localhost:8001
+2023/11/04 16:15:32 [Server http://localhost:8001] GET /_zcache/scores/Tom
+2023/11/04 16:15:32 [SlowDB] search key Tom
 
 */
 
