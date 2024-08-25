@@ -1,6 +1,8 @@
 package zweb
 
-import "net/http"
+import (
+	"net/http"
+)
 
 // HandlerFunc 定义自己的请求处理器 用户通过重写这个方法实现自己的请求处理逻辑
 type HandlerFunc func(http.ResponseWriter, *http.Request)
@@ -38,6 +40,9 @@ func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	handler := engine.router[req.Method+req.URL.Path]
 	if handler == nil {
 		http.NotFound(w, req)
+		// 上面代码等同于下面两句
+		// w.WriteHeader(http.StatusNotFound)
+		// fmt.Fprintf(w, "404 NOT FOUND: %s\n", req.URL)
 		return
 	}
 	handler(w, req)
